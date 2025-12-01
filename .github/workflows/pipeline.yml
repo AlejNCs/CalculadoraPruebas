@@ -1,0 +1,46 @@
+name: CI/CD Calculadora
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  # Integración Continua 
+  pruebas-y-validacion:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Descargar el código del repositorio
+        uses: actions/checkout@v3
+
+      - name: Configurar Python 3.9
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+
+      - name: Instalar dependencias
+        run: pip install -r requirements.txt
+
+      - name: Dar permisos de ejecución a los scripts
+        run: chmod +x scripts/*.sh
+
+      - name: Ejecutar Pruebas (Script test.sh)
+        run: ./scripts/test.sh
+
+  # Entrega y Despliegue 
+  construccion-y-despliegue:
+    needs: pruebas-y-validacion 
+    runs-on: ubuntu-latest
+    steps:
+      - name: Descargar el código
+        uses: actions/checkout@v3
+
+      - name: Dar permisos de ejecución
+        run: chmod +x scripts/*.sh
+
+      - name: Construir Entorno (Script build.sh)
+        run: ./scripts/build.sh
+
+      - name: Simular Despliegue (Script deploy.sh)
+        run: ./scripts/deploy.sh
